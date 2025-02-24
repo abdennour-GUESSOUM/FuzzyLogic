@@ -1,0 +1,16 @@
+configuration
+{
+ et := min;   // Pourquoi pas, c'est bidon...
+ ou := max;   // Pourquoi pas, c'est bidon...
+}
+
+linguistique
+{
+ bidonI := triangle(-1.0,0.0,1.0);
+ bidonS := triangle(-1.0,0.0,1.0);
+}
+
+regles
+{
+ si InSlin est bidonI alors Slin est bidonS;
+}
