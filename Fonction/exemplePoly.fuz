@@ -9,26 +9,23 @@ configuration
  ou := max;
  decodage := centre;
  implication := larsen;
- ainsi_que := somme;
+ ainsi_que := max;
 }
 
 linguistique
 {
  // Valeurs linguistiques des variables linguistiques X et Y
- petit := rampe_bas(0.0, 1.0);
- grand := rampe_haut(0.0, 1.0);
+ petit := rampe_bas(0.0, 0.50);
+ grand := rampe_haut(0.0, 0.50);
 
  // Valeurs linguistiques de la variable linguistique Z
- petitZ := triangle(0.00, 0.25, 0.50);
- moyenZ := triangle(0.25, 0.50, 0.75);
- grandZ := triangle(0.50, 0.75, 1.00);
+ petitZ := triangle(-0.50, 0.00, 0.50);
+ grandZ := triangle(11.50, 12.00, 12.50);
 }
 
 regles
 {
- si X est petit et Y est petit alors Z est petitZ;
- si X est petit et Y est grand alors Z est moyenZ;
- si X est grand et Y est petit alors Z est moyenZ;
- si X est grand et Y est grand alors Z est grandZ;
+ si X est petit alors Z est petitZ;
+ si X est grand alors Z est grandZ;
 }
 // ---End-Of-File-------------------------------------------------------------
