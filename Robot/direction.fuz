@@ -1,0 +1,62 @@
+// ----------------------------------------------------------------------------
+// File       : regleRobot0.fuz
+// Description: TP Controle flou - Robot : 1er essai
+// ----------------------------------------------------------------------------
+
+configuration
+{
+	et := min;
+	ou := max;
+	decodage := centre;
+	implication := larsen;
+	ainsi_que := max;
+}
+
+linguistique
+{
+	// Valeurs linguistiques de la variable linguistique DistGoal
+
+	// Valeurs linguistiques de la variable linguistique DirecGoal
+        onRight := rampe_bas(-90.0,0);
+        inFront := triangle(-90.0,0.0,90.0);
+        onLeft  := rampe_haut(0.0,90.0);
+
+
+        proche  := rampe_bas(80.0,200.0);
+        loin  := rampe_haut(80.0,700.0);
+
+
+
+        // Valeurs linguistiques de la variable linguistique Slin
+
+        // Valeurs linguistiques de la variable linguistique Sang
+        turnRight  := triangle(-200.0,-100.0,0.0);
+        straightOn := triangle(-100.0,0,100.0);
+        turnLeft   := triangle(0.0,100.0,200.0);
+
+
+
+        AllerVite   := triangle(0.0,150,300.0);
+        AllerLentement   := triangle(-300.0,-150.0,0.0);
+
+
+
+}
+
+
+regles
+{
+        // Reach the goal but ignore the obstacles
+
+        si DirecGoal est inFront alors Sang est straightOn;
+        si DirecGoal est onLeft  alors Sang est turnLeft;
+        si DirecGoal est onRight alors Sang est turnRight;
+
+
+        // 
+
+        si DistGoal est loin alors Slin est AllerVite;
+        si DistGoal est proche alors Slin est AllerLentement;
+
+}
+// ---End-Of-File-------------------------------------------------------------
