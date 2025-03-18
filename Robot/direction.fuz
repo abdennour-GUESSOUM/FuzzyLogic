@@ -78,6 +78,13 @@ regles
         
         si DistGoal est loin alors Slin est AllerVite;
         si DistGoal est proche alors Slin est AllerLentement;
+        
+        si ObstFront est assezProche et ObstLeft est assezProche alors Sang est turnRight;
+        si ObstFront est assezProche et ObstRight est assezProche alors Sang est turnLeft;
+        si ObstFront est distance_moyenne alors Slin est AllerLentement;
+
+        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche et ObstBack est loin alors Slin est AllerLentement;
+        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche et ObstBack est loin alors Sang est turnRight;
 
 }
 // ---End-Of-File-------------------------------------------------------------
