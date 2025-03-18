@@ -1,90 +1,88 @@
 // ----------------------------------------------------------------------------
-// File       : regleRobot0.fuz
-// Description: TP Controle flou - Robot : 1er essai
+// File       : direction.fuz
+// Description: TP Controle flou - Robot : navigation et evitement ameliores
 // ----------------------------------------------------------------------------
 
 configuration
 {
-	et := min;
-	ou := max;
-	decodage := centre;
-	implication := larsen;
-	ainsi_que := max;
+    et := min;
+    ou := max;
+    decodage := centre;
+    implication := larsen;
+    ainsi_que := max;
 }
 
 linguistique
 {
-	// Valeurs linguistiques de la variable linguistique DistGoal
+    // Valeurs linguistiques de la variable linguistique DirecGoal
+    onRight := rampe_bas(-90.0,0);
+    inFront := triangle(-90.0,0.0,90.0);
+    onLeft  := rampe_haut(0.0,90.0);
 
-	// Valeurs linguistiques de la variable linguistique DirecGoal
-        onRight := rampe_bas(-90.0,0);
-        inFront := triangle(-90.0,0.0,90.0);
-        onLeft  := rampe_haut(0.0,90.0);
+    proche  := rampe_bas(80.0,200.0);
+    loin  := rampe_haut(80.0,700.0);
 
+    tresProche := rampe_bas(0.0, 60.0);
+    assezProche := triangle(30.0, 80.0, 130.0);
+    distance_moyenne := triangle(80.0, 150.0, 220.0);
+    assezLoin := triangle(150.0, 250.0, 350.0);
+    tresLoin := rampe_haut(250.0, 500.0);
 
-        proche  := rampe_bas(80.0,200.0);
-        loin  := rampe_haut(80.0,700.0);
-
-
-        tresProche := rampe_bas(0.0, 60.0);
-        assezProche := triangle(30.0, 80.0, 130.0);
-        distance_moyenne := triangle(80.0, 150.0, 220.0);
-        assezLoin := triangle(150.0, 250.0, 350.0);
-        tresLoin := rampe_haut(250.0, 500.0);
-
-
-
-        // Valeurs linguistiques de la variable linguistique Slin
-
-        // Valeurs linguistiques de la variable linguistique Sang
-        turnRight  := triangle(-200.0,-100.0,0.0);
-        straightOn := triangle(-100.0,0,100.0);
-        turnLeft   := triangle(0.0,100.0,200.0);
-
-
-
-        AllerVite   := triangle(0.0,150,300.0);
-        AllerLentement   := triangle(-300.0,-150.0,0.0);
-
-
-
+    // Valeurs linguistiques pour la vitesse angulaire (Sang)
+    turnRight  := triangle(-200.0,-100.0,0.0);
+    straightOn := triangle(-100.0,0,100.0);
+    turnLeft   := triangle(0.0,100.0,200.0);
+    
+    // Valeurs linguistiques pour la vitesse lineaire (Slin)
+    Stop := triangle(-50.0, 0.0, 50.0);        // Nouveau: s'arreter
+    AllerTresLentement := triangle(0.0, 50.0, 100.0);  // Nouveau: tres lent pour les manœuvres
+    AllerLentement := triangle(50.0, 100.0, 150.0);
+    AllerVite := triangle(100.0, 150.0, 300.0);
 }
-
 
 regles
 {
-        // Évitement d'obstacles frontaux
-        si ObstFront est tresProche alors Slin est AllerLentement;
-        si ObstFront est assezProche alors Slin est AllerLentement;
-        
-        // Contournement d'obstacles
-        si ObstFront est tresProche et ObstLeft est distance_moyenne alors Sang est turnRight;
-        si ObstFront est tresProche et ObstRight est distance_moyenne alors Sang est turnLeft;
-        si ObstLeft est tresProche alors Sang est turnRight;
-        si ObstRight est tresProche alors Sang est turnLeft;
-        
-        // Situations complexes
-        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche alors Slin est AllerLentement;
-        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche alors Sang est turnRight;
-        
-        // Coordination navigation/évitement
-        si ObstFront est tresLoin et DirecGoal est inFront alors Slin est AllerVite;
-        si ObstFront est distance_moyenne et DirecGoal est inFront alors Slin est AllerLentement;
-        
-        // Navigation vers le but
-        si DirecGoal est inFront alors Sang est straightOn;
-        si DirecGoal est onLeft alors Sang est turnLeft;
-        si DirecGoal est onRight alors Sang est turnRight;
-        
-        si DistGoal est loin alors Slin est AllerVite;
-        si DistGoal est proche alors Slin est AllerLentement;
-        
-        si ObstFront est assezProche et ObstLeft est assezProche alors Sang est turnRight;
-        si ObstFront est assezProche et ObstRight est assezProche alors Sang est turnLeft;
-        si ObstFront est distance_moyenne alors Slin est AllerLentement;
+        // Regle par defaut pour eviter les situations non couvertes
+si DistGoal est proche et DirecGoal est inFront alors Slin est AllerLentement;
+    // ReGLE PRIMORDIALE: S'arreter ou ralentir fortement lors de virages en presence d'obstacles proches
+    si ObstFront est tresProche alors Slin est Stop;
+        si ObstLeft est tresProche et DirecGoal est onLeft alors Slin est Stop;
+        si ObstRight est tresProche et DirecGoal est onRight alors Slin est Stop;
+        si ObstLeft est tresProche et DirecGoal est onRight alors Slin est Stop;
+        si ObstRight est tresProche et DirecGoal est onLeft alors Slin est Stop;
+    
+    si ObstFront est assezLoin ou ObstFront est tresLoin alors Slin est AllerLentement;
+    // Ralentir en presence d'obstacles
+    
+    si ObstFront est assezProche alors Slin est AllerTresLentement;
+    si ObstFront est distance_moyenne alors Slin est AllerLentement;
+    
+        si DistGoal est proche et ObstFront est assezProche alors Slin est AllerTresLentement;
+si DistGoal est proche et ObstLeft est assezProche alors Slin est AllerLentement;
+si DistGoal est proche et ObstRight est assezProche alors Slin est AllerLentement;
 
-        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche et ObstBack est loin alors Slin est AllerLentement;
-        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche et ObstBack est loin alors Sang est turnRight;
-
+    // Contournement d'obstacles
+    si ObstFront est tresProche et ObstLeft est distance_moyenne alors Sang est turnRight;
+    si ObstFront est tresProche et ObstRight est distance_moyenne alors Sang est turnLeft;
+    si ObstLeft est tresProche alors Sang est turnRight;
+    si ObstRight est tresProche alors Sang est turnLeft;
+    
+    // Sortir des situations de blocage
+    si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche alors Slin est Stop;
+    si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche et ObstBack est assezLoin alors Sang est turnRight;
+    
+    // Manœuvres d'evitement avancees
+    si ObstFront est assezProche et ObstLeft est assezProche alors Sang est turnRight;
+    si ObstFront est assezProche et ObstRight est assezProche alors Sang est turnLeft;
+    
+    // Navigation vers le but
+    si DirecGoal est inFront et ObstFront est tresLoin alors Slin est AllerVite;
+    si DirecGoal est inFront et ObstFront est distance_moyenne alors Slin est AllerLentement;
+    
+    si DirecGoal est inFront alors Sang est straightOn;
+    si DirecGoal est onLeft alors Sang est turnLeft;
+    si DirecGoal est onRight alors Sang est turnRight;
+    
+    si DistGoal est loin et ObstFront est tresLoin alors Slin est AllerVite;
+    si DistGoal est proche alors Slin est AllerLentement;
 }
-// ---End-Of-File-------------------------------------------------------------
