@@ -26,6 +26,13 @@ linguistique
         loin  := rampe_haut(80.0,700.0);
 
 
+        tresProche := rampe_bas(0.0, 60.0);
+        assezProche := triangle(30.0, 80.0, 130.0);
+        distance_moyenne := triangle(80.0, 150.0, 220.0);
+        assezLoin := triangle(150.0, 250.0, 350.0);
+        tresLoin := rampe_haut(250.0, 500.0);
+
+
 
         // Valeurs linguistiques de la variable linguistique Slin
 
@@ -46,15 +53,29 @@ linguistique
 
 regles
 {
-        // Reach the goal but ignore the obstacles
-
+        // Évitement d'obstacles frontaux
+        si ObstFront est tresProche alors Slin est AllerLentement;
+        si ObstFront est assezProche alors Slin est AllerLentement;
+        
+        // Contournement d'obstacles
+        si ObstFront est tresProche et ObstLeft est distance_moyenne alors Sang est turnRight;
+        si ObstFront est tresProche et ObstRight est distance_moyenne alors Sang est turnLeft;
+        si ObstLeft est tresProche alors Sang est turnRight;
+        si ObstRight est tresProche alors Sang est turnLeft;
+        
+        // Situations complexes
+        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche alors Slin est AllerLentement;
+        si ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche alors Sang est turnRight;
+        
+        // Coordination navigation/évitement
+        si ObstFront est tresLoin et DirecGoal est inFront alors Slin est AllerVite;
+        si ObstFront est distance_moyenne et DirecGoal est inFront alors Slin est AllerLentement;
+        
+        // Navigation vers le but
         si DirecGoal est inFront alors Sang est straightOn;
-        si DirecGoal est onLeft  alors Sang est turnLeft;
+        si DirecGoal est onLeft alors Sang est turnLeft;
         si DirecGoal est onRight alors Sang est turnRight;
-
-
-        // 
-
+        
         si DistGoal est loin alors Slin est AllerVite;
         si DistGoal est proche alors Slin est AllerLentement;
 
