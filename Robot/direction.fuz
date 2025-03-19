@@ -35,8 +35,8 @@ linguistique
 
     // Rotations 
     turnSharpRight := triangle(-120.0, -60.0, 0.0);
-    turnVerySharpRight := triangle(-400.0, -350.0, -275.0); //virage tres serre droite
-    turnVerySharpLeft := triangle(275.0, 350.0, 400.0);      //virage tres serre gauche
+    turnVerySharpRight := triangle(-400.0, -350.0, -275.0); // virage tres serre droite
+    turnVerySharpLeft := triangle(275.0, 350.0, 400.0);      // virage tres serre gauche
     turnSharpLeft  := triangle(0.0, 60, 120.0); 
 
     // Vitesses angulaires 
@@ -119,7 +119,6 @@ regles
     si DirecGoal est slightRight alors Sang est turnSlightRight;
     si DirecGoal est onLeft alors Sang est turnLeft;
     si DirecGoal est onRight alors Sang est turnRight;
-    // Direction a l'oppose (behind) - Avec securite renforcee
     si DirecGoal est completelyBehind alors Slin est Stop;
     si DirecGoal est behindLeft alors Slin est Stop;
     si DirecGoal est behindRight alors Slin est Stop;
@@ -195,11 +194,9 @@ regles
     si ObstLeft est distance_moyenne et DirecGoal est onLeft et ObstFront est assezLoin alors Sang est turnSlightLeft;
     si ObstRight est distance_moyenne et DirecGoal est onRight et ObstFront est assezLoin alors Sang est turnSlightRight;
     
-    // 13. Corrections preventives lors du suivi de mur pour eviter les frôlements
-    si ObstLeft est distance_securite et InSang est turnSlightLeft et ObstFront est assezLoin alors Sang est straightOn;
-    si ObstRight est distance_securite et InSang est turnSlightRight et ObstFront est assezLoin alors Sang est straightOn;
+    // Corrections preventives lors du suivi de mur pour eviter les frôlements
+    si ObstLeft est distance_securite ou ObstRight est distance_securite et InSang est turnSlightLeft ou InSang est turnSlightRight et ObstFront est assezLoin alors Sang est straightOn;
 
     // Ajout de regles pour la rotation sur place
-    si DirecGoal est completelyBehind et ObstFront est tresProche alors Sang est turnSharpRight;
-    si DirecGoal est completelyBehind et ObstFront est tresProche alors Sang est turnSharpLeft;
+    si DirecGoal est completelyBehind et ObstFront est tresProche alors Sang est turnSharpRight et Sang est turnSharpLeft;
 }
