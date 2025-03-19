@@ -11,25 +11,26 @@ linguistique
 {
     // Direction de l'objectif - Amelioration de la granularite
     onRight := rampe_bas(-90.0, 0.0);
-    slightRight := triangle(-70.0, -45.0, -20.0);  // Nouvelle categorie pour virage leger
+    slightRight := triangle(-70.0, -45.0, -20.0);  // Categorie pour virage leger
     inFront := triangle(-30.0, 0.0, 30.0);  // Reduit pour plus de precision
-    slightLeft := triangle(20.0, 45.0, 70.0);  // Nouvelle categorie pour virage leger
+    slightLeft := triangle(20.0, 45.0, 70.0);  // Categorie pour virage leger
     onLeft  := rampe_haut(0.0, 90.0);
     behindLeft  := rampe_haut(45.0, 180.0);  // etendu pour couvrir plus d'arriere
     behindRight := rampe_bas(-180.0, -45.0); // etendu pour couvrir plus d'arriere
 
     // Distance a l'objectif - Raffinement pour mieux gerer l'approche finale
-    tres_proche := rampe_bas(0.0, 50.0);     // Nouvelle categorie pour l'arrivee
+    tres_proche := rampe_bas(0.0, 50.0);     // Categorie pour l'arrivee
     proche := triangle(30.0, 100.0, 200.0);  // Ajuste
-    moyenne := triangle(150.0, 300.0, 450.0); // Nouvelle categorie intermediaire
+    moyenne := triangle(150.0, 300.0, 450.0); // Categorie intermediaire
     loin   := rampe_haut(400.0, 700.0);     // Ajuste
 
-    // Distance aux obstacles - Ajustement pour permettre au robot de s'approcher davantage quand necessaire
-    tresProche       := rampe_bas(0.0, 100.0);            // Reduit pour plus de marge
-    assezProche      := triangle(80.0, 180.0, 280.0);     // Ajuste
-    distance_moyenne := triangle(250.0, 320.0, 390.0);    // Inchange
-    assezLoin        := triangle(350.0, 450.0, 550.0);    // Inchange
-    tresLoin         := rampe_haut(500.0, 700.0);         // Inchange
+    // Distance aux obstacles - Ajustements pour mieux gerer les deplacements paralleles
+    tresProche       := rampe_bas(0.0, 100.0);            // Pour detection immediate
+    assezProche      := triangle(80.0, 150.0, 220.0);     // Reduit pour etre plus sensible
+    distance_moyenne := triangle(180.0, 250.0, 320.0);    // Ajuste pour le suivi de mur
+    distance_securite := triangle(220.0, 280.0, 340.0);   // Nouvelle zone pour navigation parallele
+    assezLoin        := triangle(300.0, 400.0, 500.0);    // Ajuste
+    tresLoin         := rampe_haut(450.0, 700.0);         // Ajuste
 
     // Rotations plus prononcees - Augmentation de l'amplitude pour sortir des impasses
     turnSharpRight := triangle(-300.0, -200.0, -100.0);
@@ -78,8 +79,24 @@ regles
     // Regles de vitesse elevee
     si ObstFront est tresLoin alors Slin est AllerVite;
     
+    // Ajout de regles pour la rotation sur place quand le goal est a l'oppose avec obstacles proches
+    si DirecGoal est behindLeft et ObstLeft est assezProche alors Slin est Stop;
+    si DirecGoal est behindLeft et ObstFront est assezProche alors Slin est Stop;
+    si DirecGoal est behindRight et ObstRight est assezProche alors Slin est Stop;
+    si DirecGoal est behindRight et ObstFront est assezProche alors Slin est Stop;
+    
+    // Regle speciale pour le cas ou l'objectif est completement derriere
+    si DirecGoal est behindLeft ou DirecGoal est behindRight et DirecGoal est pas inFront alors Slin est Stop;
+    
     // Regles speciales pour l'approche finale
     si DistGoal est tres_proche alors Slin est AllerTresLentement;
+    
+    // Regles speciales pour l'approche finale
+    si DistGoal est tres_proche alors Slin est AllerTresLentement;
+    
+    // Regles de suivi de mur - ajustement de vitesse
+    si ObstLeft est distance_securite et ObstFront est assezLoin alors Slin est AllerLentement;
+    si ObstRight est distance_securite et ObstFront est assezLoin alors Slin est AllerLentement;
     
     // Regle de sortie de blocage - acceleration en cas d'immobilite
     si InSlin est bloque et ObstFront est assezLoin alors Slin est AllerMoyennement;
@@ -94,8 +111,11 @@ regles
     si DirecGoal est slightRight alors Sang est turnSlightRight;
     si DirecGoal est onLeft alors Sang est turnLeft;
     si DirecGoal est onRight alors Sang est turnRight;
+    // Direction a l'oppose (behind)
     si DirecGoal est behindLeft alors Sang est turnSharpLeft;
     si DirecGoal est behindRight alors Sang est turnSharpRight;
+    si DirecGoal est behindLeft et ObstLeft est tresProche alors Sang est turnSharpRight;
+    si DirecGoal est behindRight et ObstRight est tresProche alors Sang est turnSharpLeft;
     
     // 2. evitement d'obstacles basique
     si ObstLeft est tresProche alors Sang est turnRight;
@@ -107,9 +127,20 @@ regles
     si ObstFront est assezProche et DirecGoal est onRight alors Sang est turnSharpRight;
     si ObstFront est assezProche et DirecGoal est onLeft alors Sang est turnSharpLeft;
     
-    // 4. Navigation parallele aux obstacles
-    si ObstFront est assezProche et ObstLeft est assezProche alors Sang est turnRight;
-    si ObstFront est assezProche et ObstRight est assezProche alors Sang est turnLeft;
+    // 4. Navigation parallele aux obstacles - Regles ameliorees pour le suivi de mur
+    // Maintien d'une distance de securite constante avec le mur gauche
+    si ObstLeft est tresProche alors Sang est turnSharpRight;
+    si ObstLeft est assezProche alors Sang est turnRight;
+    si ObstLeft est distance_securite et DirecGoal est onLeft alors Sang est straightOn;
+    si ObstLeft est distance_securite et ObstFront est assezLoin alors Sang est turnSlightLeft;
+    si ObstLeft est distance_securite et ObstFront est assezProche alors Sang est turnRight;
+    
+    // Maintien d'une distance de securite constante avec le mur droit
+    si ObstRight est tresProche alors Sang est turnSharpLeft;
+    si ObstRight est assezProche alors Sang est turnLeft;
+    si ObstRight est distance_securite et DirecGoal est onRight alors Sang est straightOn;
+    si ObstRight est distance_securite et ObstFront est assezLoin alors Sang est turnSlightRight;
+    si ObstRight est distance_securite et ObstFront est assezProche alors Sang est turnLeft;
     
     // 5. evitement d'obstacles avec rotations prononcees
     si ObstFront est tresProche et DirecGoal est onLeft alors Sang est turnSharpLeft;
@@ -137,4 +168,12 @@ regles
     // 11. Sortie de blocage en position complexe
     si InSlin est bloque et ObstFront est tresProche et ObstLeft est tresProche et ObstRight est tresProche alors Sang est turnVerySharpLeft;
     si InSlin est bloque et ObstFront est tresProche et ObstBack est assezLoin alors Sang est turnVerySharpRight;
+    
+    // 12. Ajustements fins pour le suivi de mur sur longue distance
+    si ObstLeft est distance_moyenne et DirecGoal est onLeft et ObstFront est assezLoin alors Sang est turnSlightLeft;
+    si ObstRight est distance_moyenne et DirecGoal est onRight et ObstFront est assezLoin alors Sang est turnSlightRight;
+    
+    // 13. Corrections preventives lors du suivi de mur pour eviter les frôlements
+    si ObstLeft est distance_securite et InSang est turnSlightLeft et ObstFront est assezLoin alors Sang est straightOn;
+    si ObstRight est distance_securite et InSang est turnSlightRight et ObstFront est assezLoin alors Sang est straightOn;
 }
