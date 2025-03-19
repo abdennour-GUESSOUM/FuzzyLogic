@@ -35,19 +35,19 @@ linguistique
 
     // Rotations 
     turnSharpRight := triangle(-300.0, -200.0, -100.0);
-    turnVerySharpRight := triangle(-400.0, -350.0, -250.0); virage tres serre
-    turnVerySharpLeft := triangle(250.0, 350.0, 400.0);     Nouvelle categorie pour virage tres serre
+    turnVerySharpRight := triangle(-400.0, -350.0, -275.0); //virage tres serre droite
+    turnVerySharpLeft := triangle(275.0, 350.0, 400.0);      //virage tres serre gauche
     turnSharpLeft  := triangle(100.0, 200.0, 300.0); 
 
     // Vitesses angulaires 
-    turnRight  := triangle(-150.0, -75.0, 0.0);
+    turnRight  := triangle(-90, -45.0, 0.0);
     turnSlightRight := triangle(-120.0, -60.0, 0.0);  //virage leger
     straightOn := triangle(-50.0, 0.0, 50.0);         
     turnSlightLeft := triangle(0.0, 60.0, 120.0);     //virage leger
-    turnLeft   := triangle(0.0, 75.0, 150.0);
+    turnLeft   := triangle(0.0, 45.0, 90.0);
     
     // Vitesses lineaires 
-    Stop              := triangle(-30.0, 0.0, 30.0);
+    Stop              := triangle(-20.0, 0.0, 20.0);
     AllerTresLentement := triangle(0.0, 25.0, 50.0);
     AllerLentement    := triangle(50.0, 100.0, 150.0);
     AllerMoyennement  := triangle(100.0, 150.0, 200.0);  
@@ -57,7 +57,7 @@ linguistique
     presque_zero := triangle(-10.0, 0.0, 10.0);
     
     // Capteurs de blocage 
-    bloque := rampe_bas(0.0, 10.0);          // Vitesse lineaire faible indiquant un blocage
+    bloque := rampe_bas(0.0, 15.0);          // Vitesse lineaire faible indiquant un blocage
     oscillant := triangle(-20.0, 0.0, 20.0);  // Vitesse angulaire oscillante
 }
 
