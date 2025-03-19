@@ -52,6 +52,7 @@ linguistique
     AllerLentement    := triangle(50.0, 100.0, 150.0);
     AllerMoyennement  := triangle(100.0, 150.0, 200.0);  
     AllerVite         := triangle(0, 150, 300);  
+    AllerTresVite := triangle(200.0, 300.0, 400.0); // Tres rapide
 
     // Vitesse angulaire presque nulle
     presque_zero := triangle(-15.0, 0.0, 15.0);
@@ -95,7 +96,7 @@ regles
     // Regles speciales pour l'approche finale
     si DistGoal est tres_proche alors Slin est AllerTresLentement;
     
-    // Regles speciales pour l'approche finale
+    // Correction de doublons
     si DistGoal est tres_proche alors Slin est AllerTresLentement;
     
     // Regles de suivi de mur - ajustement de vitesse
@@ -105,6 +106,9 @@ regles
     // Regle de sortie de blocage - acceleration en cas d'immobilite
     si InSlin est bloque et ObstFront est assezLoin alors Slin est AllerMoyennement;
     
+    // Ajout de regles pour la vitesse tres elevee
+    si ObstFront est tresLoin et DistGoal est loin alors Slin est AllerTresVite;
+
     //--------------------------------------------------
     // ReGLES POUR LA VITESSE ANGULAIRE
     //--------------------------------------------------
@@ -194,4 +198,8 @@ regles
     // 13. Corrections preventives lors du suivi de mur pour eviter les frôlements
     si ObstLeft est distance_securite et InSang est turnSlightLeft et ObstFront est assezLoin alors Sang est straightOn;
     si ObstRight est distance_securite et InSang est turnSlightRight et ObstFront est assezLoin alors Sang est straightOn;
+
+    // Ajout de regles pour la rotation sur place
+    si DirecGoal est completelyBehind et ObstFront est tresProche alors Sang est turnSharpRight;
+    si DirecGoal est completelyBehind et ObstFront est tresProche alors Sang est turnSharpLeft;
 }
