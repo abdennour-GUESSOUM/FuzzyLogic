@@ -9,14 +9,15 @@ configuration
 
 linguistique
 {
-    // Direction de l'objectif - Amelioration de la granularite
+    // Direction de l'objectif 
     onRight := rampe_bas(-90.0, 0.0);
     slightRight := triangle(-70.0, -45.0, -20.0);  // Categorie pour virage leger
-    inFront := triangle(-30.0, 0.0, 30.0);  // Reduit pour plus de precision
+    inFront := triangle(-30.0, 0.0, 30.0);  
     slightLeft := triangle(20.0, 45.0, 70.0);  // Categorie pour virage leger
     onLeft  := rampe_haut(0.0, 90.0);
-    behindLeft  := rampe_haut(45.0, 180.0);  // etendu pour couvrir plus d'arriere
-    behindRight := rampe_bas(-180.0, -45.0); // etendu pour couvrir plus d'arriere
+    behindLeft  := rampe_haut(90.0, 180.0);  // "derriere"
+    behindRight := rampe_bas(-180.0, -90.0); // "derriere"
+    completelyBehind := triangle(-180.0, 0, 180.0); // exactement derriere
 
     // Distance a l'objectif - Raffinement pour mieux gerer l'approche finale
     tres_proche := rampe_bas(0.0, 50.0);     // Categorie pour l'arrivee
@@ -24,38 +25,38 @@ linguistique
     moyenne := triangle(150.0, 300.0, 450.0); // Categorie intermediaire
     loin   := rampe_haut(400.0, 700.0);     // Ajuste
 
-    // Distance aux obstacles - Ajustements pour mieux gerer les deplacements paralleles
+    // Distance aux obstacles
     tresProche       := rampe_bas(0.0, 100.0);            // Pour detection immediate
     assezProche      := triangle(80.0, 150.0, 220.0);     // Reduit pour etre plus sensible
     distance_moyenne := triangle(180.0, 250.0, 320.0);    // Ajuste pour le suivi de mur
-    distance_securite := triangle(220.0, 280.0, 340.0);   // Nouvelle zone pour navigation parallele
+    distance_securite := triangle(220.0, 280.0, 340.0);   // navigation parallele
     assezLoin        := triangle(300.0, 400.0, 500.0);    // Ajuste
     tresLoin         := rampe_haut(450.0, 700.0);         // Ajuste
 
-    // Rotations plus prononcees - Augmentation de l'amplitude pour sortir des impasses
+    // Rotations 
     turnSharpRight := triangle(-300.0, -200.0, -100.0);
-    turnVerySharpRight := triangle(-400.0, -350.0, -250.0); // Nouvelle categorie pour virage tres serre
-    turnVerySharpLeft := triangle(250.0, 350.0, 400.0);     // Nouvelle categorie pour virage tres serre
+    turnVerySharpRight := triangle(-400.0, -350.0, -250.0); virage tres serre
+    turnVerySharpLeft := triangle(250.0, 350.0, 400.0);     Nouvelle categorie pour virage tres serre
     turnSharpLeft  := triangle(100.0, 200.0, 300.0); 
 
-    // Vitesses angulaires - Raffinement pour des mouvements plus precis
-    turnRight  := triangle(-200.0, -100.0, 0.0);
-    turnSlightRight := triangle(-120.0, -60.0, 0.0);  // Nouvelle categorie pour virage leger
-    straightOn := triangle(-50.0, 0.0, 50.0);         // Reduit pour plus de precision
-    turnSlightLeft := triangle(0.0, 60.0, 120.0);     // Nouvelle categorie pour virage leger
-    turnLeft   := triangle(0.0, 100.0, 200.0);
+    // Vitesses angulaires 
+    turnRight  := triangle(-150.0, -75.0, 0.0);
+    turnSlightRight := triangle(-120.0, -60.0, 0.0);  //virage leger
+    straightOn := triangle(-50.0, 0.0, 50.0);         
+    turnSlightLeft := triangle(0.0, 60.0, 120.0);     //virage leger
+    turnLeft   := triangle(0.0, 75.0, 150.0);
     
-    // Vitesses lineaires - Ajout de vitesses intermediaires
-    Stop              := triangle(-50.0, 0.0, 50.0);
-    AllerTresLentement := triangle(0.0, 50.0, 100.0);
+    // Vitesses lineaires 
+    Stop              := triangle(-30.0, 0.0, 30.0);
+    AllerTresLentement := triangle(0.0, 25.0, 50.0);
     AllerLentement    := triangle(50.0, 100.0, 150.0);
-    AllerMoyennement  := triangle(100.0, 150.0, 200.0);  // Nouvelle categorie intermediaire
-    AllerVite         := triangle(150.0, 200.0, 300.0);  // Ajuste pour une meilleure progression
+    AllerMoyennement  := triangle(100.0, 150.0, 200.0);  
+    AllerVite         := triangle(0, 150, 300);  
 
     // Vitesse angulaire presque nulle
     presque_zero := triangle(-10.0, 0.0, 10.0);
     
-    // Capteurs de blocage - Pour detecter l'immobilite ou les oscillations
+    // Capteurs de blocage 
     bloque := rampe_bas(0.0, 10.0);          // Vitesse lineaire faible indiquant un blocage
     oscillant := triangle(-20.0, 0.0, 20.0);  // Vitesse angulaire oscillante
 }
@@ -71,6 +72,9 @@ regles
     
     // Regles de mouvement lent
     si ObstFront est assezProche alors Slin est AllerTresLentement;
+    
+    // Toujours ralentir quand on tourne fortement
+    si InSang est turnSharpLeft ou InSang est turnSharpRight alors Slin est AllerTresLentement;
     
     // Regles de vitesse moyenne
     si ObstFront est distance_moyenne alors Slin est AllerLentement;
@@ -111,11 +115,24 @@ regles
     si DirecGoal est slightRight alors Sang est turnSlightRight;
     si DirecGoal est onLeft alors Sang est turnLeft;
     si DirecGoal est onRight alors Sang est turnRight;
-    // Direction a l'oppose (behind)
-    si DirecGoal est behindLeft alors Sang est turnSharpLeft;
-    si DirecGoal est behindRight alors Sang est turnSharpRight;
-    si DirecGoal est behindLeft et ObstLeft est tresProche alors Sang est turnSharpRight;
-    si DirecGoal est behindRight et ObstRight est tresProche alors Sang est turnSharpLeft;
+    // Direction a l'oppose (behind) - Avec securite renforcee
+    si DirecGoal est completelyBehind alors Slin est Stop;
+    si DirecGoal est behindLeft alors Slin est Stop;
+    si DirecGoal est behindRight alors Slin est Stop;
+    
+    // Rotation prudente quand l'objectif est derriere
+    si DirecGoal est behindLeft et ObstLeft est tresProche ou ObstLeft est assezProche alors Sang est turnRight;
+    si DirecGoal est behindRight et ObstRight est tresProche ou ObstRight est assezProche alors Sang est turnLeft;
+    si DirecGoal est behindLeft et ObstLeft est pas tresProche alors Sang est turnSlightLeft;
+    si DirecGoal est behindRight et ObstRight est pas tresProche alors Sang est turnSlightRight;
+    
+    // Rotations pour l'objectif exactement derriere
+    si DirecGoal est completelyBehind et ObstLeft est assezLoin alors Sang est turnSlightLeft;
+    si DirecGoal est completelyBehind et ObstRight est assezLoin alors Sang est turnSlightRight;
+    
+    // Priorite maximale: JAMAIS tourner vers un mur proche
+    si InSang est turnLeft et ObstLeft est tresProche alors Sang est turnRight;
+    si InSang est turnRight et ObstRight est tresProche alors Sang est turnLeft;
     
     // 2. evitement d'obstacles basique
     si ObstLeft est tresProche alors Sang est turnRight;
