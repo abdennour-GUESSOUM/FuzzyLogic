@@ -1,10 +1,10 @@
 configuration
 {
-    et := min;
+    et := min; // min et produit
     ou := max;
-    decodage := centre;
-    implication := larsen;
-    ainsi_que := max;
+    decodage := centre; // centre et max et ..
+    implication := larsen;  // mamdani aussi
+    ainsi_que := somme; // max
 }
 
 linguistique

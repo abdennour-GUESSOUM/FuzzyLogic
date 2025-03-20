@@ -7,9 +7,9 @@ configuration
 {
 	et := min;
 	ou := max;
-	decodage := centre;
-	implication := larsen;
-	ainsi_que := max;
+	decodage := moyenne;
+	implication := mamdani; // larsen : produit mamdani : min
+	ainsi_que := somme;
 }
 
 linguistique
